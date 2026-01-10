@@ -1,0 +1,66 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9A6986BC-412B-4868-9025-868F03AC299B}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulkyBook.DataAccess", "src\Bulky.DataAccess\BulkyBook.DataAccess.csproj", "{818B3CB3-A88C-4D0E-95AF-85912025A8A4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulkyBook.Models", "src\Bulky.Models\BulkyBook.Models.csproj", "{0B6613E8-CB32-4D23-B161-29AB6604DE38}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulkyBook.Utility", "src\Bulky.Utility\BulkyBook.Utility.csproj", "{51690809-A755-4978-A5CF-FF5102426EE1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulkyBook", "src\BulkyWeb\BulkyBook.csproj", "{080923A6-075D-47A2-BB2A-4635C7380038}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F02A9970-17AB-40DD-83BB-A5A3F4323458}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkyBook.Tests", "src\BulkyBook.Tests\BulkyBook.Tests.csproj", "{4E1CF192-5540-4D69-9CC4-53958E950F98}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkyBook.UITests", "src\BulkyBook.UITests\BulkyBook.UITests.csproj", "{7E2D0BBD-F9E7-4DAA-B17E-266157751AEA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{818B3CB3-A88C-4D0E-95AF-85912025A8A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{818B3CB3-A88C-4D0E-95AF-85912025A8A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{818B3CB3-A88C-4D0E-95AF-85912025A8A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{818B3CB3-A88C-4D0E-95AF-85912025A8A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B6613E8-CB32-4D23-B161-29AB6604DE38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B6613E8-CB32-4D23-B161-29AB6604DE38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B6613E8-CB32-4D23-B161-29AB6604DE38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B6613E8-CB32-4D23-B161-29AB6604DE38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51690809-A755-4978-A5CF-FF5102426EE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51690809-A755-4978-A5CF-FF5102426EE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51690809-A755-4978-A5CF-FF5102426EE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51690809-A755-4978-A5CF-FF5102426EE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{080923A6-075D-47A2-BB2A-4635C7380038}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{080923A6-075D-47A2-BB2A-4635C7380038}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{080923A6-075D-47A2-BB2A-4635C7380038}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{080923A6-075D-47A2-BB2A-4635C7380038}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E1CF192-5540-4D69-9CC4-53958E950F98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E1CF192-5540-4D69-9CC4-53958E950F98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E1CF192-5540-4D69-9CC4-53958E950F98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E1CF192-5540-4D69-9CC4-53958E950F98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E2D0BBD-F9E7-4DAA-B17E-266157751AEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E2D0BBD-F9E7-4DAA-B17E-266157751AEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E2D0BBD-F9E7-4DAA-B17E-266157751AEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E2D0BBD-F9E7-4DAA-B17E-266157751AEA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D64610C6-AE72-4097-ABC0-66801C69BF7F}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4E1CF192-5540-4D69-9CC4-53958E950F98} = {F02A9970-17AB-40DD-83BB-A5A3F4323458}
+		{7E2D0BBD-F9E7-4DAA-B17E-266157751AEA} = {F02A9970-17AB-40DD-83BB-A5A3F4323458}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,31 @@
+﻿@page
+@model BulkyWeb_Razer.Pages.Categories.CreateModel
+<form method="post">
+    <div class="border p-4 mt-2">
+        <div class="row pb-2">
+            <h1>Create Category</h1>
+            </hr>            
+        </div>
+        <div class="mb-3 p-1" >
+            <label asp-for="category.Name"></label>
+            <input asp-for="category.Name" type="text" class="form-control" />
+            <span asp-validation-for="category.Name" class="text-danger"></span>
+        </div>
+        <div class="mb-3 p-1">
+            <label asp-for="category.DisplayOrder"></label>
+            <input asp-for="category.DisplayOrder" type="text" class="form-control" />
+            <span asp-validation-for="category.DisplayOrder" class="text-danger"></span>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <button type="submit" class="btn btn-primary form-control">Create</button>
+            </div>
+            <div class="col-6">
+                <a asp-page="/categories/index"  class="btn btn-secondary border form-control">Back To List Page</a>
+            </div>
+        </div>
+       
+      
+    </div>
+
+</form>
