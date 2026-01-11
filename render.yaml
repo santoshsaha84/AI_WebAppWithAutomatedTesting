@@ -1,5 +1,24 @@
+databases:
+  # DEV Database
+  - name: bulky-db-dev
+    plan: free
+    databaseName: bulky_dev
+    user: bulky_user
+
+  # TEST Database
+  - name: bulky-db-test
+    plan: free
+    databaseName: bulky_test
+    user: bulky_user
+
+  # PROD Database
+  - name: bulky-db-prod
+    plan: free
+    databaseName: bulky_prod
+    user: bulky_user
+
 services:
-  # DEV Environment
+  # DEV Web Service
   - type: web
     name: bulky-web-dev
     runtime: docker
@@ -13,13 +32,7 @@ services:
       - key: ASPNETCORE_ENVIRONMENT
         value: Development
 
-  - type: psql
-    name: bulky-db-dev
-    plan: free
-    databaseName: bulky_dev
-    user: bulky_user
-
-  # TEST Environment
+  # TEST Web Service
   - type: web
     name: bulky-web-test
     runtime: docker
@@ -33,13 +46,7 @@ services:
       - key: ASPNETCORE_ENVIRONMENT
         value: Staging
 
-  - type: psql
-    name: bulky-db-test
-    plan: free
-    databaseName: bulky_test
-    user: bulky_user
-
-  # PROD Environment
+  # PROD Web Service
   - type: web
     name: bulky-web-prod
     runtime: docker
@@ -52,9 +59,3 @@ services:
           property: connectionString
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
-
-  - type: psql
-    name: bulky-db-prod
-    plan: free
-    databaseName: bulky_prod
-    user: bulky_user
