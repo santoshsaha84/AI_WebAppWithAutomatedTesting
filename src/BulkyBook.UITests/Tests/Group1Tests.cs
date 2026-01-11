@@ -21,8 +21,10 @@ namespace BulkyBook.UITests.Tests
             DatabaseHelper.ResetDatabaseToKnownState("Bulky");
             
             var options = new ChromeOptions();
-            // Removed headless mode to run in visible browser
-            // options.AddArgument("--headless=new");
+            if (Environment.GetEnvironmentVariable("HEADLESS") == "true")
+            {
+                options.AddArgument("--headless=new");
+            }
             options.AddArgument("--no-sandbox");
             options.AddArgument("--disable-dev-shm-usage");
             _driver = new ChromeDriver(options);

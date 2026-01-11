@@ -1,58 +1,58 @@
-version: '3.8' # Specify the version of the Docker Compose file format
+version: '3.8'
 
 services:
-  # Database service for instance 1
-  db_instance1:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+  # Database for App Instance 1
+  postgres_db1:
+    image: postgres:latest
     environment:
-      - SA_PASSWORD=NinjaKing@100s00
-      - ACCEPT_EULA=Y
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
-      - "14330:1433" # Expose port 14330 for the first database
+      - "5434:5432"
     healthcheck:
-      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -U sa -P NinjaKing@100s00 -Q 'SELECT 1' -C" ]
-      interval: 30s
-      timeout: 10s
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
       retries: 5
-    volumes:
-      - C:\Projects\Bulky_28_09_2024:/var/opt/mssql/backup/Bulky_backup
 
-  # Database service for instance 2
-  db_instance2:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+  # Database for App Instance 2
+  postgres_db2:
+    image: postgres:latest
     environment:
-      - SA_PASSWORD=NinjaKing@100s00
-      - ACCEPT_EULA=Y
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
-      - "14340:1433" # Expose port 14340 for the second database
+      - "5435:5432" # Mapped to host 5435
     healthcheck:
-      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -U sa -P NinjaKing@100s00 -Q 'SELECT 1' -C" ]
-      interval: 30s
-      timeout: 10s
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
       retries: 5
-    volumes:
-      - C:\Projects\Bulky_28_09_2024:/var/opt/mssql/backup/Bulky_backup
 
-  # Application instance 1 (connects to db_instance1)
+  # Application instance 1
   instance1:
     image: bulkyimage1
     build: .
     ports:
-      - "5003:80" # Unique port for instance 1
+      - "5003:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db_instance1,1433;Database=Bulky;User Id=sa;Password=NinjaKing@100s00;TrustServerCertificate=True;
+      # Use internal docker networking (port 5432) to connect to db1
+      - "ConnectionStrings__DefaultConnection=Host=postgres_db1;Database=Bulky;Username=postgres;Password=postgres"
     depends_on:
-      - db_instance1
+      postgres_db1:
+        condition: service_healthy
 
-  # Application instance 2 (connects to db_instance2)
+  # Application instance 2
   instance2:
     image: bulkyimage1
     build: .
     ports:
-      - "5004:80" # Unique port for instance 2
+      - "5004:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db_instance2,1433;Database=Bulky_1;User Id=sa;Password=NinjaKing@100s00;TrustServerCertificate=True;
+      # Use internal docker networking (port 5432) to connect to db2
+      - "ConnectionStrings__DefaultConnection=Host=postgres_db2;Database=Bulky_1;Username=postgres;Password=postgres"
     depends_on:
-      - db_instance2
+      postgres_db2:
+        condition: service_healthy

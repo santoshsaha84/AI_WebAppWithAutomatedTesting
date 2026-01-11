@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using TEST_DATA_SETUP.Data;
 using TEST_DATA_SETUP.Models;
@@ -10,64 +9,43 @@ namespace BulkyBook.UITests.Helpers
     {
         public static void ResetDatabaseToKnownState(string databaseName)
         {
-            // Determine connection string based on database name (for Docker instances)
-            string server = databaseName == "Bulky" ? "localhost,14330" : "localhost,14340";
-            string connectionString = $"Server={server};Database=master;User Id=sa;Password=NinjaKing@100s00;TrustServerCertificate=True;";
-            string databaseString = $"Server={server};Database={databaseName};User Id=sa;Password=NinjaKing@100s00;TrustServerCertificate=True;";
+            // Determine port based on database name to match docker-compose ports (avoiding 5432/5433 to prevent conflicts)
+            string port = databaseName == "Bulky" ? "5434" : "5435";
+            string connectionString = $"Host=localhost;Port={port};Database={databaseName};Username=postgres;Password=postgres";
 
-            // Backup file path INSIDE the container (based on volume mount)
-            string backupFilePath = @"/var/opt/mssql/backup/Bulky_backup";
+            var optionsBuilder = new DbContextOptionsBuilder<BulkyContext>();
+            optionsBuilder.UseNpgsql(connectionString);
 
-            // SQL commands
-            string setSingleUser = $"ALTER DATABASE [{databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE";
-            string restoreDatabase = $"RESTORE DATABASE [{databaseName}] FROM DISK = '{backupFilePath}' WITH REPLACE, " +
-                                     $"MOVE 'Bulky' TO '/var/opt/mssql/data/{databaseName}.mdf', " +
-                                     $"MOVE 'Bulky_log' TO '/var/opt/mssql/data/{databaseName}_log.ldf'";
-            string setMultiUser = $"ALTER DATABASE [{databaseName}] SET MULTI_USER";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (var context = new BulkyContext(optionsBuilder.Options))
             {
-                try
-                {
-                    connection.Open();
+                // Ensure the database is clean (Drop and Recreate)
+                // This replaces the RESTORE DATABASE logic.
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
 
-                    // Switch to SINGLE_USER
-                    using (SqlCommand command = new SqlCommand(setSingleUser, connection))
-                    {
-                        try { command.ExecuteNonQuery(); } catch { /* Ignore if DB doesn't exist yet */ }
-                    }
+                // Seed Base Data (Categories) because BulkyContext does not have them by default 
+                // (ApplicationDbContext usually does this, but we are using BulkyContext for tests).
+                // We recreate the categories found in the original SQL Server backup.
+                SeedCategories(context);
 
-                    // Restore database
-                    using (SqlCommand command = new SqlCommand(restoreDatabase, connection))
-                    {
-                        command.ExecuteNonQuery();
-                        Console.WriteLine($"Database [{databaseName}] restored successfully on {server}.");
-                    }
-
-                    // Switch back to MULTI_USER
-                    using (SqlCommand command = new SqlCommand(setMultiUser, connection))
-                    {
-                        command.ExecuteNonQuery();
-                    }
-
-                    // Seed data using EF Core
-                    var optionsBuilder = new DbContextOptionsBuilder<BulkyContext>();
-                    optionsBuilder.UseSqlServer(databaseString);
-
-                    using (var context = new BulkyContext(optionsBuilder.Options))
-                    {
-                        if (databaseName == "Bulky")
-                            SeedDatabase1(context);
-                        else
-                            SeedDatabase2(context);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    throw;
-                }
+               // Seed Test Specific Data
+                if (databaseName == "Bulky")
+                    SeedDatabase1(context);
+                else
+                    SeedDatabase2(context);
             }
+        }
+
+        private static void SeedCategories(BulkyContext context)
+        {
+            // IDs are explicitly set to match what the tests might expect if they rely on IDs.
+            // If Identity Insert is an issue, Npgsql handles it, or we rely on EF Core.
+            context.Categories.AddRange(
+                new Category { Id = 1, Name = "History", DisplayOrder = 1 },
+                new Category { Id = 2, Name = "Geograph", DisplayOrder = 1 },
+                new Category { Id = 3, Name = "Math", DisplayOrder = 1 }
+            );
+            context.SaveChanges();
         }
 
         private static void SeedDatabase1(BulkyContext context)
@@ -81,7 +59,7 @@ namespace BulkyBook.UITests.Helpers
                 Price50 = 100,
                 ListPrice = 100,
                 Author = "mnc",
-                CategoryId = 2, // Assumed category ID 2 exists in backup
+                CategoryId = 2, 
                 Isbn = "1234",
                 ImageUrl = ""
             });

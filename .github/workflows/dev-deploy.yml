@@ -1,0 +1,67 @@
+name: Dev Build & Deploy
+
+on:
+  push:
+    branches: [ "dev" ]
+  workflow_dispatch:
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore
+
+    - name: Start App Instance 1 (Port 5003)
+      run: |
+        dotnet run --project src/BulkyWeb/BulkyBook.csproj --urls "http://localhost:5003" &
+      env:
+        ConnectionStrings__DefaultConnection: "Host=localhost;Database=Bulky;Username=postgres;Password=postgres"
+
+    - name: Start App Instance 2 (Port 5004)
+      run: |
+        dotnet run --project src/BulkyWeb/BulkyBook.csproj --urls "http://localhost:5004" &
+      env:
+        ConnectionStrings__DefaultConnection: "Host=localhost;Database=Bulky_1;Username=postgres;Password=postgres"
+
+    - name: Wait for Apps to Start
+      run: sleep 20
+
+    - name: Run Tests (Unit + UI)
+      run: dotnet test
+      env:
+        HEADLESS: "true"
+        # DatabaseHelper in UITests will rely on default connection string builder pointing to localhost:5432
+
+    - name: Deploy to Render (Dev)
+      if: success()
+      run: |
+        if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_DEV }}" ]; then
+          curl "${{ secrets.RENDER_DEPLOY_HOOK_DEV }}"
+        else
+          echo "Render Deploy Hook secret not found. Skipping deploy."
+        fi
