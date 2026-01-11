@@ -9,13 +9,28 @@ jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
     services:
-      postgres:
+      # Match local docker-compose: db1 on 5434
+      postgres_db1:
         image: postgres:latest
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
-          - 5432:5432
+          - 5434:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      # Match local docker-compose: db2 on 5435
+      postgres_db2:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5435:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -36,17 +51,19 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
 
+    # App Instance 1 connects to DB1 (5434)
     - name: Start App Instance 1 (Port 5003)
       run: |
         dotnet run --project src/BulkyWeb/BulkyBook.csproj --urls "http://localhost:5003" &
       env:
-        ConnectionStrings__DefaultConnection: "Host=localhost;Database=Bulky;Username=postgres;Password=postgres"
+        ConnectionStrings__DefaultConnection: "Host=localhost;Port=5434;Database=Bulky;Username=postgres;Password=postgres"
 
+    # App Instance 2 connects to DB2 (5435)
     - name: Start App Instance 2 (Port 5004)
       run: |
         dotnet run --project src/BulkyWeb/BulkyBook.csproj --urls "http://localhost:5004" &
       env:
-        ConnectionStrings__DefaultConnection: "Host=localhost;Database=Bulky_1;Username=postgres;Password=postgres"
+        ConnectionStrings__DefaultConnection: "Host=localhost;Port=5435;Database=Bulky_1;Username=postgres;Password=postgres"
 
     - name: Wait for Apps to Start
       run: sleep 20
@@ -55,7 +72,7 @@ jobs:
       run: dotnet test
       env:
         HEADLESS: "true"
-        # DatabaseHelper in UITests will rely on default connection string builder pointing to localhost:5432
+        # Test code (DatabaseHelper) is already hardcoded to use 5434/5435
 
     - name: Deploy to Render (Dev)
       if: success()
