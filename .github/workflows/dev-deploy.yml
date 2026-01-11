@@ -66,7 +66,7 @@ jobs:
         ConnectionStrings__DefaultConnection: "Host=localhost;Port=5435;Database=Bulky_1;Username=postgres;Password=postgres"
 
     - name: Wait for Apps to Start
-      run: sleep 20
+      run: sleep 40
 
     - name: Run Tests (Unit + UI)
       run: dotnet test

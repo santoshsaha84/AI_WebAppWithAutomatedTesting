@@ -23,9 +23,11 @@ namespace BulkyBook.UITests.Helpers
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
 
+                // Manually synchronize migration history so the background app doesn't crash trying to re-migrate
+                context.Database.ExecuteSqlRaw("CREATE TABLE IF NOT EXISTS \"__EFMigrationsHistory\" (\"MigrationId\" character varying(150) NOT NULL, \"ProductVersion\" character varying(32) NOT NULL, CONSTRAINT \"PK___EFMigrationsHistory\" PRIMARY KEY (\"MigrationId\"));");
+                context.Database.ExecuteSqlRaw("INSERT INTO \"__EFMigrationsHistory\" (\"MigrationId\", \"ProductVersion\") VALUES ('20260111145233_InitialCreate', '7.0.16');");
+
                 // Seed Base Data (Categories) because BulkyContext does not have them by default 
-                // (ApplicationDbContext usually does this, but we are using BulkyContext for tests).
-                // We recreate the categories found in the original SQL Server backup.
                 SeedCategories(context);
 
                // Seed Test Specific Data
