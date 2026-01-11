@@ -24,6 +24,7 @@ namespace BulkyBook.UITests.Tests
             if (Environment.GetEnvironmentVariable("HEADLESS") == "true")
             {
                 options.AddArgument("--headless=new");
+                options.AddArgument("--window-size=1920,1080"); // Ensure desktop layout in headless
             }
             options.AddArgument("--no-sandbox");
             options.AddArgument("--disable-dev-shm-usage");
