@@ -14,22 +14,41 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Fix for Render.com: Convert postgres:// URL to Npgsql Connection String
-if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgres://"))
+// Debug logging for Render (SAFE: only shows prefix and length)
+if (!string.IsNullOrEmpty(connectionString))
 {
-    var databaseUri = new Uri(connectionString);
-    var userInfo = databaseUri.UserInfo.Split(':');
-    var npgsqlBuilder = new Npgsql.NpgsqlConnectionStringBuilder
+    Console.WriteLine($"Connection string detected. Length: {connectionString.Length}. Starts with: {(connectionString.Length > 10 ? connectionString.Substring(0, 10) : connectionString)}");
+}
+else
+{
+    Console.WriteLine("No connection string found in DefaultConnection configuration.");
+}
+
+// Fix for Render.com: Convert postgres:// or postgresql:// URL to Npgsql Connection String
+if (!string.IsNullOrEmpty(connectionString) && (connectionString.StartsWith("postgres://") || connectionString.StartsWith("postgresql://")))
+{
+    Console.WriteLine("PostgreSQL URI detected. Converting to Npgsql format...");
+    try 
     {
-        Host = databaseUri.Host,
-        Port = databaseUri.Port,
-        Username = userInfo[0],
-        Password = userInfo[1],
-        Database = databaseUri.LocalPath.TrimStart('/'),
-        SslMode = Npgsql.SslMode.Require,
-        TrustServerCertificate = true // Required for some hosting providers like Render/DigitalOcean
-    };
-    connectionString = npgsqlBuilder.ToString();
+        var databaseUri = new Uri(connectionString);
+        var userInfo = databaseUri.UserInfo.Split(':');
+        var npgsqlBuilder = new Npgsql.NpgsqlConnectionStringBuilder
+        {
+            Host = databaseUri.Host,
+            Port = databaseUri.Port,
+            Username = userInfo[0],
+            Password = userInfo.Length > 1 ? userInfo[1] : "",
+            Database = databaseUri.LocalPath.TrimStart('/'),
+            SslMode = Npgsql.SslMode.Require,
+            TrustServerCertificate = true
+        };
+        connectionString = npgsqlBuilder.ToString();
+        Console.WriteLine("Conversion successful.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error parsing PostgreSQL URI: {ex.Message}");
+    }
 }
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
