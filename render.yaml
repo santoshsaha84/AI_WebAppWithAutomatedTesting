@@ -1,20 +1,8 @@
 databases:
-  # DEV Database
+  # DEV Database (Only one allowed on Free Tier)
   - name: bulky-db-dev
     plan: free
     databaseName: bulky_dev
-    user: bulky_user
-
-  # TEST Database
-  - name: bulky-db-test
-    plan: free
-    databaseName: bulky_test
-    user: bulky_user
-
-  # PROD Database
-  - name: bulky-db-prod
-    plan: free
-    databaseName: bulky_prod
     user: bulky_user
 
 services:
@@ -31,31 +19,3 @@ services:
           property: connectionString
       - key: ASPNETCORE_ENVIRONMENT
         value: Development
-
-  # TEST Web Service
-  - type: web
-    name: bulky-web-test
-    runtime: docker
-    plan: free
-    autoDeploy: false
-    envVars:
-      - key: ConnectionStrings__DefaultConnection
-        fromDatabase:
-          name: bulky-db-test
-          property: connectionString
-      - key: ASPNETCORE_ENVIRONMENT
-        value: Staging
-
-  # PROD Web Service
-  - type: web
-    name: bulky-web-prod
-    runtime: docker
-    plan: free
-    autoDeploy: false
-    envVars:
-      - key: ConnectionStrings__DefaultConnection
-        fromDatabase:
-          name: bulky-db-prod
-          property: connectionString
-      - key: ASPNETCORE_ENVIRONMENT
-        value: Production
