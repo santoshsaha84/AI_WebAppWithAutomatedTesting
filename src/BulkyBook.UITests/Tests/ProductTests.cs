@@ -8,6 +8,7 @@ using SeleniumExtras.WaitHelpers;
 namespace BulkyBook.UITests.Tests
 {
     [TestFixture]
+    [NonParallelizable]
     public class ProductTests
     {
         private IWebDriver _driver;

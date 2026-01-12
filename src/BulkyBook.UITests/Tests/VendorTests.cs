@@ -13,12 +13,12 @@ namespace BulkyBook.UITests.Tests
     {
         private IWebDriver _driver;
         private WebDriverWait _wait;
-        private const string AppUrl = "http://localhost:5003/";
+        private const string AppUrl = "http://localhost:5004/";
 
         [SetUp]
         public void SetUp()
         {
-            DatabaseHelper.ResetDatabaseToKnownState("Bulky");
+            DatabaseHelper.ResetDatabaseToKnownState("Bulky_1");
             
             var options = new ChromeOptions();
             if (Environment.GetEnvironmentVariable("HEADLESS") == "true")
