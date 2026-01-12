@@ -52,8 +52,10 @@ namespace BulkyBook.UITests.Helpers
                     // Manually synchronize migration history
                     context.Database.ExecuteSqlRaw("CREATE TABLE IF NOT EXISTS \"__EFMigrationsHistory\" (\"MigrationId\" character varying(150) NOT NULL, \"ProductVersion\" character varying(32) NOT NULL, CONSTRAINT \"PK___EFMigrationsHistory\" PRIMARY KEY (\"MigrationId\"));");
                     context.Database.ExecuteSqlRaw("INSERT INTO \"__EFMigrationsHistory\" (\"MigrationId\", \"ProductVersion\") VALUES ('20260111145233_InitialCreate', '7.0.16');");
+                    context.Database.ExecuteSqlRaw("INSERT INTO \"__EFMigrationsHistory\" (\"MigrationId\", \"ProductVersion\") VALUES ('20260112100025_AddVendorTable', '7.0.16');");
 
                     SeedCategories(context);
+                    SeedVendors(context);
 
                     if (databaseName == "Bulky")
                         SeedDatabase1(context);
@@ -76,6 +78,15 @@ namespace BulkyBook.UITests.Helpers
                 new Category { Name = "History", DisplayOrder = 1 },
                 new Category { Name = "Geograph", DisplayOrder = 1 },
                 new Category { Name = "Math", DisplayOrder = 1 }
+            );
+            context.SaveChanges();
+        }
+
+        private static void SeedVendors(BulkyContext context)
+        {
+            context.Vendors.AddRange(
+                new Vendor { Name = "Rajkamal", City = "Hyderabad", Address = "Koti" },
+                new Vendor { Name = "Seed Vendor", City = "Seed City", Address = "Seed Address" }
             );
             context.SaveChanges();
         }

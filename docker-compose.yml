@@ -33,6 +33,7 @@ services:
   instance1:
     image: bulkyimage1
     build: .
+    restart: on-failure
     ports:
       - "5003:80"
     environment:
@@ -47,6 +48,7 @@ services:
   instance2:
     image: bulkyimage1
     build: .
+    restart: on-failure
     ports:
       - "5004:80"
     environment:
