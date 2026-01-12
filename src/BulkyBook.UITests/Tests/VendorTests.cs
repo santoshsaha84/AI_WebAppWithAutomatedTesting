@@ -9,7 +9,7 @@ namespace BulkyBook.UITests.Tests
 {
     [TestFixture]
     [NonParallelizable]
-    public class CategoryTests
+    public class VendorTests
     {
         private IWebDriver _driver;
         private WebDriverWait _wait;
@@ -33,44 +33,46 @@ namespace BulkyBook.UITests.Tests
         }
 
         [Test]
-        public void AddCategory_Success()
+        public void AddVendor_Success()
         {
             _driver.Navigate().GoToUrl(AppUrl);
             _driver.Manage().Window.Maximize();
 
-            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Content Mangement')]")));
-            contentManagementLink.Click();
-            var categoryLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Category')]")));
-            categoryLink.Click();
+            var vendorMgmtLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Vendor Management')]")));
+            vendorMgmtLink.Click();
+            var vendorAddressLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Vendor Address')]")));
+            vendorAddressLink.Click();
 
-            var createBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Create New Category')]")));
+            var createBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Create New Vendor')]")));
             createBtn.Click();
 
-            _wait.Until(ExpectedConditions.ElementExists(By.Id("Name"))).SendKeys("UI Test Category");
-            _driver.FindElement(By.Id("DisplayOrder")).SendKeys("99");
+            _wait.Until(ExpectedConditions.ElementExists(By.Id("Name"))).SendKeys("UI Test Vendor");
+            _driver.FindElement(By.Id("City")).SendKeys("Test City");
+            _driver.FindElement(By.Id("Address")).SendKeys("Test Address");
+            
             var submitBtn = _driver.FindElement(By.XPath("//button[contains(@type,'submit') and contains(.,'Create')]"));
             ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", submitBtn);
 
-            _wait.Until(ExpectedConditions.ElementExists(By.XPath("//td[contains(.,'UI Test Category')]")));
+            _wait.Until(ExpectedConditions.ElementExists(By.XPath("//td[contains(.,'UI Test Vendor')]")));
         }
 
         [Test]
-        public void DeleteCategory_Success()
+        public void DeleteVendor_Success()
         {
             _driver.Navigate().GoToUrl(AppUrl);
             
-            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Content Mangement')]")));
-            contentManagementLink.Click();
-            var categoryLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Category')]")));
-            categoryLink.Click();
+            var vendorMgmtLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Vendor Management')]")));
+            vendorMgmtLink.Click();
+            var vendorAddressLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Vendor Address')]")));
+            vendorAddressLink.Click();
 
-            var deleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//td[contains(.,'Math')]/parent::tr//a[contains(@class,'btn-danger')]")));
+            var deleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//td[contains(.,'Seed Vendor')]/parent::tr//a[contains(@class,'btn-danger')]")));
             deleteBtn.Click();
 
             var confirmDeleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(@type,'submit') and contains(.,'Delete')]")));
             ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", confirmDeleteBtn);
 
-            _wait.Until(ExpectedConditions.InvisibilityOfElementWithText(By.XPath("//td"), "Math"));
+            _wait.Until(ExpectedConditions.InvisibilityOfElementWithText(By.XPath("//td"), "Seed Vendor"));
         }
 
         [TearDown]
