@@ -9,32 +9,60 @@ namespace BulkyBook.UITests.Helpers
     {
         public static void ResetDatabaseToKnownState(string databaseName)
         {
-            // Determine port based on database name to match docker-compose ports (avoiding 5432/5433 to prevent conflicts)
             string port = databaseName == "Bulky" ? "5434" : "5435";
             string connectionString = $"Host=localhost;Port={port};Database={databaseName};Username=postgres;Password=postgres";
+            string masterConnectionString = $"Host=localhost;Port={port};Database=postgres;Username=postgres;Password=postgres";
 
-            var optionsBuilder = new DbContextOptionsBuilder<BulkyContext>();
-            optionsBuilder.UseNpgsql(connectionString);
+            Console.WriteLine($"[DatabaseHelper] Resetting database '{databaseName}' on port {port}...");
 
-            using (var context = new BulkyContext(optionsBuilder.Options))
+            try
             {
-                // Ensure the database is clean (Drop and Recreate)
-                // This replaces the RESTORE DATABASE logic.
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
+                var optionsBuilder = new DbContextOptionsBuilder<BulkyContext>();
+                optionsBuilder.UseNpgsql(masterConnectionString);
 
-                // Manually synchronize migration history so the background app doesn't crash trying to re-migrate
-                context.Database.ExecuteSqlRaw("CREATE TABLE IF NOT EXISTS \"__EFMigrationsHistory\" (\"MigrationId\" character varying(150) NOT NULL, \"ProductVersion\" character varying(32) NOT NULL, CONSTRAINT \"PK___EFMigrationsHistory\" PRIMARY KEY (\"MigrationId\"));");
-                context.Database.ExecuteSqlRaw("INSERT INTO \"__EFMigrationsHistory\" (\"MigrationId\", \"ProductVersion\") VALUES ('20260111145233_InitialCreate', '7.0.16');");
+                using (var context = new BulkyContext(optionsBuilder.Options))
+                {
+                    // Terminate active connections to allow dropping
+                    Console.WriteLine($"[DatabaseHelper] Terminating active connections to '{databaseName}'...");
+                    context.Database.ExecuteSqlRaw($@"
+                        SELECT pg_terminate_backend(pg_stat_activity.pid)
+                        FROM pg_stat_activity
+                        WHERE pg_stat_activity.datname = '{databaseName}'
+                          AND pid <> pg_backend_pid();");
 
-                // Seed Base Data (Categories) because BulkyContext does not have them by default 
-                SeedCategories(context);
+                    Console.WriteLine($"[DatabaseHelper] Dropping and recreating '{databaseName}'...");
+                    context.Database.ExecuteSqlRaw($"DROP DATABASE IF EXISTS \"{databaseName}\";");
+                    context.Database.ExecuteSqlRaw($"CREATE DATABASE \"{databaseName}\";");
+                }
 
-               // Seed Test Specific Data
-                if (databaseName == "Bulky")
-                    SeedDatabase1(context);
-                else
-                    SeedDatabase2(context);
+                // Connect to the new database to seed it
+                var seedOptionsBuilder = new DbContextOptionsBuilder<BulkyContext>();
+                seedOptionsBuilder.UseNpgsql(connectionString);
+
+                using (var context = new BulkyContext(seedOptionsBuilder.Options))
+                {
+                    Console.WriteLine($"[DatabaseHelper] Seeding schema and data...");
+                    // EnsureCreated only creates tables, skips migrations
+                    context.Database.EnsureCreated();
+
+                    // Manually synchronize migration history
+                    context.Database.ExecuteSqlRaw("CREATE TABLE IF NOT EXISTS \"__EFMigrationsHistory\" (\"MigrationId\" character varying(150) NOT NULL, \"ProductVersion\" character varying(32) NOT NULL, CONSTRAINT \"PK___EFMigrationsHistory\" PRIMARY KEY (\"MigrationId\"));");
+                    context.Database.ExecuteSqlRaw("INSERT INTO \"__EFMigrationsHistory\" (\"MigrationId\", \"ProductVersion\") VALUES ('20260111145233_InitialCreate', '7.0.16');");
+
+                    SeedCategories(context);
+
+                    if (databaseName == "Bulky")
+                        SeedDatabase1(context);
+                    else
+                        SeedDatabase2(context);
+                    
+                    Console.WriteLine($"[DatabaseHelper] Database '{databaseName}' reset successfully.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DatabaseHelper] ERROR resetting database '{databaseName}': {ex.Message}");
+                throw;
             }
         }
 
