@@ -8,23 +8,22 @@ using SeleniumExtras.WaitHelpers;
 namespace BulkyBook.UITests.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.All)]
-    public class Group2Tests
+    public class CategoryTests
     {
         private IWebDriver _driver;
         private WebDriverWait _wait;
-        private const string AppUrl = "http://localhost:5004/";
+        private const string AppUrl = "http://localhost:5003/";
 
         [SetUp]
         public void SetUp()
         {
-            DatabaseHelper.ResetDatabaseToKnownState("Bulky_1");
+            DatabaseHelper.ResetDatabaseToKnownState("Bulky");
             
             var options = new ChromeOptions();
             if (Environment.GetEnvironmentVariable("HEADLESS") == "true")
             {
                 options.AddArgument("--headless=new");
-                options.AddArgument("--window-size=1920,1080"); // Ensure desktop layout in headless
+                options.AddArgument("--window-size=1920,1080");
             }
             options.AddArgument("--no-sandbox");
             options.AddArgument("--disable-dev-shm-usage");
@@ -33,29 +32,43 @@ namespace BulkyBook.UITests.Tests
         }
 
         [Test]
-        [Category("Group2")]
-        public void TestFeature1()
+        public void AddCategory_Success()
         {
             _driver.Navigate().GoToUrl(AppUrl);
             _driver.Manage().Window.Maximize();
 
-            // Wait for page to load - wait for navbar to be present
-            _wait.Until(ExpectedConditions.ElementExists(By.ClassName("navbar")));
-            
-            // Wait for Content Management dropdown toggle (note: actual text is "Content Mangement" with typo)
             var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Content Mangement')]")));
             contentManagementLink.Click();
-            var categoryLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Product')]")));
+            var categoryLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Category')]")));
             categoryLink.Click();
 
-            // Wait for the product row with 'qpl' to be present and clickable
-            var productRowLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//tr/td[contains(.,'qpl')]//parent::tr//a[contains(@href, 'Upsert')]")));
-            productRowLink.Click();
+            var createBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Create New Category')]")));
+            createBtn.Click();
 
-            // Wait for ISBN input field to be present and send keys
-            var isbnInput = _wait.Until(ExpectedConditions.ElementExists(By.Id("Product_ISBN")));
-            isbnInput.Clear();
-            isbnInput.SendKeys("1234567123");
+            _wait.Until(ExpectedConditions.ElementExists(By.Id("Name"))).SendKeys("UI Test Category");
+            _driver.FindElement(By.Id("DisplayOrder")).SendKeys("99");
+            _driver.FindElement(By.XPath("//button[contains(@type,'submit') and contains(.,'Create')]")).Click();
+
+            _wait.Until(ExpectedConditions.ElementExists(By.XPath("//td[contains(.,'UI Test Category')]")));
+        }
+
+        [Test]
+        public void DeleteCategory_Success()
+        {
+            _driver.Navigate().GoToUrl(AppUrl);
+            
+            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Content Mangement')]")));
+            contentManagementLink.Click();
+            var categoryLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Category')]")));
+            categoryLink.Click();
+
+            var deleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//td[contains(.,'Math')]/parent::tr//a[contains(@class,'btn-danger')]")));
+            deleteBtn.Click();
+
+            var confirmDeleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(@type,'submit') and contains(.,'Delete')]")));
+            confirmDeleteBtn.Click();
+
+            _wait.Until(ExpectedConditions.InvisibilityOfElementWithText(By.XPath("//td"), "Math"));
         }
 
         [TearDown]
@@ -73,8 +86,6 @@ namespace BulkyBook.UITests.Tests
                     var screenshot = ((ITakesScreenshot)_driver).GetScreenshot();
                     screenshot.SaveAsFile(fullPath, ScreenshotImageFormat.Png);
                     Console.WriteLine($"[DEBUG] Screenshot saved to: {fullPath}");
-                    
-                    // Also print page source for DOM analysis
                     Console.WriteLine("[DEBUG] Page Source at failure:");
                     Console.WriteLine(_driver.PageSource);
                 }

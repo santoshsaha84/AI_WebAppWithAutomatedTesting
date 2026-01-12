@@ -8,18 +8,16 @@ using SeleniumExtras.WaitHelpers;
 namespace BulkyBook.UITests.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.All)]
-    public class CrudTests
+    public class ProductTests
     {
         private IWebDriver _driver;
         private WebDriverWait _wait;
-        private const string AppUrl = "http://localhost:5005/";
+        private const string AppUrl = "http://localhost:5004/";
 
         [SetUp]
         public void SetUp()
         {
-            // Reset Database 3 (Bulky_2)
-            DatabaseHelper.ResetDatabaseToKnownState("Bulky_2");
+            DatabaseHelper.ResetDatabaseToKnownState("Bulky_1");
             
             var options = new ChromeOptions();
             if (Environment.GetEnvironmentVariable("HEADLESS") == "true")
@@ -34,49 +32,6 @@ namespace BulkyBook.UITests.Tests
         }
 
         [Test]
-        [Category("CRUD")]
-        public void AddCategory_Success()
-        {
-            _driver.Navigate().GoToUrl(AppUrl);
-            _driver.Manage().Window.Maximize();
-
-            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Content Mangement')]")));
-            contentManagementLink.Click();
-            var categoryLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Category')]")));
-            categoryLink.Click();
-
-            var createBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Create New Category')]")));
-            createBtn.Click();
-
-            _wait.Until(ExpectedConditions.ElementExists(By.Id("Name"))).SendKeys("UI Test Category");
-            _driver.FindElement(By.Id("DisplayOrder")).SendKeys("99");
-            _driver.FindElement(By.XPath("//button[contains(@type,'submit') and contains(.,'Create')]")).Click();
-
-            _wait.Until(ExpectedConditions.ElementExists(By.XPath("//td[contains(.,'UI Test Category')]")));
-        }
-
-        [Test]
-        [Category("CRUD")]
-        public void DeleteCategory_Success()
-        {
-            _driver.Navigate().GoToUrl(AppUrl);
-            
-            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Content Mangement')]")));
-            contentManagementLink.Click();
-            var categoryLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Category')]")));
-            categoryLink.Click();
-
-            var deleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//td[contains(.,'Math')]/parent::tr//a[contains(@class,'btn-danger')]")));
-            deleteBtn.Click();
-
-            var confirmDeleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(@type,'submit') and contains(.,'Delete')]")));
-            confirmDeleteBtn.Click();
-
-            _wait.Until(ExpectedConditions.InvisibilityOfElementWithText(By.XPath("//td"), "Math"));
-        }
-
-        [Test]
-        [Category("CRUD")]
         public void AddProduct_Success()
         {
             _driver.Navigate().GoToUrl(AppUrl);
@@ -111,7 +66,6 @@ namespace BulkyBook.UITests.Tests
         }
 
         [Test]
-        [Category("CRUD")]
         public void DeleteProduct_Success()
         {
             _driver.Navigate().GoToUrl(AppUrl);

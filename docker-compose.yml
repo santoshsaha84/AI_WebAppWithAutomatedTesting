@@ -15,28 +15,14 @@ services:
       timeout: 5s
       retries: 5
 
-  # Database for App Instance 2
+  # Database for Application Instance 2
   postgres_db2:
     image: postgres:latest
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
-      - "5435:5432" # Mapped to host 5435
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Database for CrudTests (App Instance 3)
-  postgres_db3:
-    image: postgres:latest
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5436:5432"
+      - "5435:5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
@@ -68,19 +54,7 @@ services:
       # Use internal docker networking (port 5432) to connect to db2
       - "ConnectionStrings__DefaultConnection=Host=postgres_db2;Database=Bulky_1;Username=postgres;Password=postgres;Pooling=False"
     depends_on:
-      postgres_db2:
+      postgres_db1:
         condition: service_healthy
-
-  # Application instance 3 (for CrudTests)
-  instance3:
-    image: bulkyimage1
-    build: .
-    ports:
-      - "5005:80"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      # Use internal docker networking (port 5432) to connect to db3
-      - "ConnectionStrings__DefaultConnection=Host=postgres_db3;Database=Bulky_2;Username=postgres;Password=postgres;Pooling=False"
-    depends_on:
-      postgres_db3:
+      postgres_db2:
         condition: service_healthy
