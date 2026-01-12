@@ -40,19 +40,19 @@ namespace BulkyBook.UITests.Tests
             _driver.Navigate().GoToUrl(AppUrl);
             _driver.Manage().Window.Maximize();
 
-            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(text(),'Content Mangement')]")));
+            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Content Mangement')]")));
             contentManagementLink.Click();
-            var categoryLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(text(),'Category')]")));
+            var categoryLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Category')]")));
             categoryLink.Click();
 
-            var createBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(text(),'Create New Category')]")));
+            var createBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Create New Category')]")));
             createBtn.Click();
 
             _wait.Until(ExpectedConditions.ElementExists(By.Id("Name"))).SendKeys("UI Test Category");
             _driver.FindElement(By.Id("DisplayOrder")).SendKeys("99");
-            _driver.FindElement(By.XPath("//button[contains(@type,'submit') and contains(text(),'Create')]")).Click();
+            _driver.FindElement(By.XPath("//button[contains(@type,'submit') and contains(.,'Create')]")).Click();
 
-            _wait.Until(ExpectedConditions.ElementExists(By.XPath("//td[contains(text(),'UI Test Category')]")));
+            _wait.Until(ExpectedConditions.ElementExists(By.XPath("//td[contains(.,'UI Test Category')]")));
         }
 
         [Test]
@@ -61,15 +61,15 @@ namespace BulkyBook.UITests.Tests
         {
             _driver.Navigate().GoToUrl(AppUrl);
             
-            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(text(),'Content Mangement')]")));
+            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Content Mangement')]")));
             contentManagementLink.Click();
-            var categoryLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(text(),'Category')]")));
+            var categoryLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Category')]")));
             categoryLink.Click();
 
-            var deleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//td[contains(text(),'Math')]/parent::tr//a[contains(@class,'btn-danger')]")));
+            var deleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//td[contains(.,'Math')]/parent::tr//a[contains(@class,'btn-danger')]")));
             deleteBtn.Click();
 
-            var confirmDeleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(@type,'submit') and contains(text(),'Delete')]")));
+            var confirmDeleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(@type,'submit') and contains(.,'Delete')]")));
             confirmDeleteBtn.Click();
 
             _wait.Until(ExpectedConditions.InvisibilityOfElementWithText(By.XPath("//td"), "Math"));
@@ -81,16 +81,20 @@ namespace BulkyBook.UITests.Tests
         {
             _driver.Navigate().GoToUrl(AppUrl);
 
-            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(text(),'Content Mangement')]")));
+            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Content Mangement')]")));
             contentManagementLink.Click();
-            var productLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(text(),'Product')]")));
+            var productLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Product')]")));
             productLink.Click();
 
-            var createBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(text(),'Create New Product')]")));
+            var createBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Create New Product')]")));
             createBtn.Click();
 
             _wait.Until(ExpectedConditions.ElementExists(By.Id("Product_Title"))).SendKeys("UI Test Product");
-            _driver.FindElement(By.Id("Product_Description")).SendKeys("This is a test product description.");
+            
+            // Handle TinyMCE for Product Description
+            _wait.Until(d => ((IJavaScriptExecutor)d).ExecuteScript("return typeof tinymce !== 'undefined' && tinymce.get('Product_Description') !== null"));
+            ((IJavaScriptExecutor)_driver).ExecuteScript("tinymce.get('Product_Description').setContent('This is a test product description.')");
+
             _driver.FindElement(By.Id("Product_ISBN")).SendKeys("UT-123456");
             _driver.FindElement(By.Id("Product_Author")).SendKeys("Selenium Tester");
             _driver.FindElement(By.Id("Product_ListPrice")).SendKeys("50");
@@ -101,9 +105,9 @@ namespace BulkyBook.UITests.Tests
             var categorySelect = new SelectElement(_driver.FindElement(By.Id("Product_CategoryId")));
             categorySelect.SelectByText("History");
 
-            _driver.FindElement(By.XPath("//button[contains(@type,'submit') and contains(text(),'Create')]")).Click();
+            _driver.FindElement(By.XPath("//button[contains(@type,'submit') and contains(.,'Create')]")).Click();
 
-            _wait.Until(ExpectedConditions.ElementExists(By.XPath("//td[contains(text(),'UI Test Product')]")));
+            _wait.Until(ExpectedConditions.ElementExists(By.XPath("//td[contains(.,'UI Test Product')]")));
         }
 
         [Test]
@@ -112,15 +116,15 @@ namespace BulkyBook.UITests.Tests
         {
             _driver.Navigate().GoToUrl(AppUrl);
 
-            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(text(),'Content Mangement')]")));
+            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Content Mangement')]")));
             contentManagementLink.Click();
-            var productLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(text(),'Product')]")));
+            var productLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Product')]")));
             productLink.Click();
 
-            var deleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//td[contains(text(),'xya')]/parent::tr//a[contains(@class,'btn-danger')]")));
+            var deleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//td[contains(.,'xya')]/parent::tr//a[contains(@class,'btn-danger')]")));
             deleteBtn.Click();
 
-            var confirmDeleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(@type,'submit') and contains(text(),'Delete')]")));
+            var confirmDeleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(@type,'submit') and contains(.,'Delete')]")));
             confirmDeleteBtn.Click();
 
             _wait.Until(ExpectedConditions.InvisibilityOfElementWithText(By.XPath("//td"), "xya"));
