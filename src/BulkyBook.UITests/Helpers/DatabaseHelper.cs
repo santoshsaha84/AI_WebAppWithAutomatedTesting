@@ -13,7 +13,6 @@ namespace BulkyBook.UITests.Helpers
             {
                 "Bulky" => "5434",
                 "Bulky_1" => "5435",
-                "Bulky_2" => "5436",
                 _ => throw new ArgumentException($"Unknown database name: {databaseName}")
             };
             string connectionString = $"Host=localhost;Port={port};Database={databaseName};Username=postgres;Password=postgres;Pooling=False";
@@ -48,7 +47,6 @@ namespace BulkyBook.UITests.Helpers
                 using (var context = new BulkyContext(seedOptionsBuilder.Options))
                 {
                     Console.WriteLine($"[DatabaseHelper] Seeding schema and data...");
-                    // EnsureCreated only creates tables, skips migrations
                     context.Database.EnsureCreated();
 
                     // Manually synchronize migration history
@@ -59,10 +57,8 @@ namespace BulkyBook.UITests.Helpers
 
                     if (databaseName == "Bulky")
                         SeedDatabase1(context);
-                    else if (databaseName == "Bulky_1")
-                        SeedDatabase2(context);
                     else
-                        SeedDatabase3(context);
+                        SeedDatabase2(context);
                     
                     Console.WriteLine($"[DatabaseHelper] Database '{databaseName}' reset successfully.");
                 }
@@ -76,54 +72,23 @@ namespace BulkyBook.UITests.Helpers
 
         private static void SeedCategories(BulkyContext context)
         {
-            // IDs are explicitly set to match what the tests might expect if they rely on IDs.
-            // If Identity Insert is an issue, Npgsql handles it, or we rely on EF Core.
             context.Categories.AddRange(
-                new Category { Id = 1, Name = "History", DisplayOrder = 1 },
-                new Category { Id = 2, Name = "Geograph", DisplayOrder = 1 },
-                new Category { Id = 3, Name = "Math", DisplayOrder = 1 }
+                new Category { Name = "History", DisplayOrder = 1 },
+                new Category { Name = "Geograph", DisplayOrder = 1 },
+                new Category { Name = "Math", DisplayOrder = 1 }
             );
             context.SaveChanges();
         }
 
         private static void SeedDatabase1(BulkyContext context)
         {
-            context.Products.Add(new Product
-            {
-                Title = "xya",
-                Description = "abc",
-                Price = 100,
-                Price100 = 100,
-                Price50 = 100,
-                ListPrice = 100,
-                Author = "mnc",
-                CategoryId = 2, 
-                Isbn = "1234",
-                ImageUrl = ""
-            });
-            context.SaveChanges();
+            // Specifically for Group1 (Category) tests if needed
+            // But we already have seeded categories.
         }
 
         private static void SeedDatabase2(BulkyContext context)
         {
-            context.Products.Add(new Product
-            {
-                Title = "qpl",
-                Description = "upi",
-                Price = 40,
-                Price100 = 60,
-                Price50 = 90,
-                ListPrice = 30,
-                Author = "mnc",
-                CategoryId = 2,
-                Isbn = "12341234",
-                ImageUrl = ""
-            });
-            context.SaveChanges();
-        }
-        private static void SeedDatabase3(BulkyContext context)
-        {
-            // Seed a product for CrudTests (DeleteProduct_Success)
+            // Seed a product for deletion test in ProductTests
             context.Products.Add(new Product
             {
                 Title = "xya",
@@ -133,8 +98,8 @@ namespace BulkyBook.UITests.Helpers
                 Price50 = 100,
                 ListPrice = 100,
                 Author = "Seeder",
-                CategoryId = 1,
-                Isbn = "SEED-CRUD-1",
+                CategoryId = context.Categories.First(u => u.Name == "History").Id,
+                Isbn = "SEED-DEL-1",
                 ImageUrl = ""
             });
             context.SaveChanges();
