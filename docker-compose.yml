@@ -38,7 +38,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       # Use internal docker networking (port 5432) to connect to db1
-      - "ConnectionStrings__DefaultConnection=Host=postgres_db1;Database=Bulky;Username=postgres;Password=postgres"
+      - "ConnectionStrings__DefaultConnection=Host=postgres_db1;Database=Bulky;Username=postgres;Password=postgres;Pooling=False"
     depends_on:
       postgres_db1:
         condition: service_healthy
@@ -52,7 +52,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       # Use internal docker networking (port 5432) to connect to db2
-      - "ConnectionStrings__DefaultConnection=Host=postgres_db2;Database=Bulky_1;Username=postgres;Password=postgres"
+      - "ConnectionStrings__DefaultConnection=Host=postgres_db2;Database=Bulky_1;Username=postgres;Password=postgres;Pooling=False"
     depends_on:
       postgres_db2:
         condition: service_healthy

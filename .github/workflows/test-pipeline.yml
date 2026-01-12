@@ -38,9 +38,10 @@ jobs:
         docker compose build
         docker compose up -d
         echo "Waiting for services to be healthy..."
-        # Compose depends_on with service_healthy will wait for DBs
-        # We still add a small buffer for the apps to finish migrations
-        sleep 10
+        # Wait for apps to respond (ignoring 500s initially as they might be migrating)
+        timeout 60 bash -c 'until curl -s http://localhost:5003/ > /dev/null; do echo "App 1 still starting..."; sleep 3; done'
+        timeout 60 bash -c 'until curl -s http://localhost:5004/ > /dev/null; do echo "App 2 still starting..."; sleep 3; done'
+        echo "Applications are responding!"
 
     - name: Run UI tests
       env:

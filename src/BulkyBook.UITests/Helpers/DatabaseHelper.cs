@@ -10,8 +10,8 @@ namespace BulkyBook.UITests.Helpers
         public static void ResetDatabaseToKnownState(string databaseName)
         {
             string port = databaseName == "Bulky" ? "5434" : "5435";
-            string connectionString = $"Host=localhost;Port={port};Database={databaseName};Username=postgres;Password=postgres";
-            string masterConnectionString = $"Host=localhost;Port={port};Database=postgres;Username=postgres;Password=postgres";
+            string connectionString = $"Host=localhost;Port={port};Database={databaseName};Username=postgres;Password=postgres;Pooling=False";
+            string masterConnectionString = $"Host=localhost;Port={port};Database=postgres;Username=postgres;Password=postgres;Pooling=False";
 
             Console.WriteLine($"[DatabaseHelper] Resetting database '{databaseName}' on port {port}...");
 
