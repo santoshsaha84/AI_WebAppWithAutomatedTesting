@@ -47,7 +47,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: postgres
         ports:
-          - 14330:5432
+          - 5434:5432
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 10s
@@ -59,7 +59,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: postgres
         ports:
-          - 14340:5432
+          - 5435:5432
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 10s
@@ -105,7 +105,7 @@ jobs:
           --name app-instance1 \
           -p 5003:80 \
           -e ASPNETCORE_ENVIRONMENT=Development \
-          -e ConnectionStrings__DefaultConnection="Host=host.docker.internal;Port=14330;Database=Bulky;Username=postgres;Password=postgres" \
+          -e ConnectionStrings__DefaultConnection="Host=host.docker.internal;Port=5434;Database=Bulky;Username=postgres;Password=postgres" \
           --add-host=host.docker.internal:host-gateway \
           bulkyimage1
 
@@ -115,7 +115,7 @@ jobs:
           --name app-instance2 \
           -p 5004:80 \
           -e ASPNETCORE_ENVIRONMENT=Development \
-          -e ConnectionStrings__DefaultConnection="Host=host.docker.internal;Port=14340;Database=Bulky_1;Username=postgres;Password=postgres" \
+          -e ConnectionStrings__DefaultConnection="Host=host.docker.internal;Port=5435;Database=Bulky_1;Username=postgres;Password=postgres" \
           --add-host=host.docker.internal:host-gateway \
           bulkyimage1
 
@@ -135,6 +135,8 @@ jobs:
           --verbosity normal \
           --logger "trx;LogFileName=ui-test-results.trx" \
           -- NUnit.NumberOfTestWorkers=1
+        env:
+          HEADLESS: true
 
     - name: Upload UI test results
       uses: actions/upload-artifact@v4
