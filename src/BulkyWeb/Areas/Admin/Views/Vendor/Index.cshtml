@@ -1,0 +1,39 @@
+@model List<Vendor>
+
+<div class="card shadow border-0 mt-4">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-2">Vendor List</h2>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card-body p-4">
+    <div class="container">
+        <div class="row p-4">
+            <div class="col-6">
+                @* Potential for Create Button later *@
+            </div>
+        </div>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Vendor Name</th>
+                    <th>Vendor City</th>
+                    <th>Vendor Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var obj in Model)
+                {
+                    <tr>
+                        <td>@obj.Name</td>
+                        <td>@obj.City</td>
+                        <td>@obj.Address</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

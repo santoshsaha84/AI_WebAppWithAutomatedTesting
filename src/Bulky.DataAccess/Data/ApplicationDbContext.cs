@@ -9,8 +9,8 @@ namespace BulkyBookWeb.Data
 
       
         public DbSet<Category> Categories { get; set; }
-
         public DbSet<Product> Products { get; set; }
+        public DbSet<Vendor> Vendors { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -106,6 +106,10 @@ namespace BulkyBookWeb.Data
                     ImageUrl = ""
                 }
                 );
+
+            modelBuilder.Entity<Vendor>().HasData(
+                new Vendor { Id = 1, Name = "Rajkamal", City = "Hyderabad", Address = "Koti" }
+            );
         }
     }
 }
