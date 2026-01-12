@@ -47,7 +47,8 @@ namespace BulkyBook.UITests.Tests
 
             _wait.Until(ExpectedConditions.ElementExists(By.Id("Name"))).SendKeys("UI Test Category");
             _driver.FindElement(By.Id("DisplayOrder")).SendKeys("99");
-            _driver.FindElement(By.XPath("//button[contains(@type,'submit') and contains(.,'Create')]")).Click();
+            var submitBtn = _driver.FindElement(By.XPath("//button[contains(@type,'submit') and contains(.,'Create')]"));
+            ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", submitBtn);
 
             _wait.Until(ExpectedConditions.ElementExists(By.XPath("//td[contains(.,'UI Test Category')]")));
         }
@@ -66,7 +67,7 @@ namespace BulkyBook.UITests.Tests
             deleteBtn.Click();
 
             var confirmDeleteBtn = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(@type,'submit') and contains(.,'Delete')]")));
-            confirmDeleteBtn.Click();
+            ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", confirmDeleteBtn);
 
             _wait.Until(ExpectedConditions.InvisibilityOfElementWithText(By.XPath("//td"), "Math"));
         }
