@@ -43,15 +43,13 @@ namespace BulkyBook.UITests.Tests
             _wait.Until(ExpectedConditions.ElementExists(By.ClassName("navbar")));
             
             // Wait for Content Management dropdown toggle (note: actual text is "Content Mangement" with typo)
-            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(text(),'Content Mangement')]")));
+            var contentManagementLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(.,'Content Mangement')]")));
             contentManagementLink.Click();
-
-            // Wait for Product link in dropdown to be clickable
-            var productLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(text(),'Product')]")));
-            productLink.Click();
+            var categoryLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//a[contains(@class,'dropdown-item') and contains(.,'Product')]")));
+            categoryLink.Click();
 
             // Wait for the product row with 'qpl' to be present and clickable
-            var productRowLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//tr/td[contains(text(),'qpl')]//parent::tr//a[contains(@href, 'Upsert')]")));
+            var productRowLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//tr/td[contains(.,'qpl')]//parent::tr//a[contains(@href, 'Upsert')]")));
             productRowLink.Click();
 
             // Wait for ISBN input field to be present and send keys
