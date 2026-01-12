@@ -30,7 +30,7 @@ namespace TEST_DATA_SETUP.Data
                 entity.HasIndex(e => e.CategoryId, "IX_Products_CategoryId");
 
                 entity.Property(e => e.ImageUrl)
-                      .HasDefaultValueSql("(N'')");
+                      .HasDefaultValueSql("''");
 
                 entity.Property(e => e.Isbn)
                       .HasColumnName("ISBN");
