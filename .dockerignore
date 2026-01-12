@@ -1,0 +1,14 @@
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/out
+**/publish
+.git
+.gitignore
+.dockerignore
+LICENSE
+README.md
+*.trx
+*.png
+Screenshots/
