@@ -108,9 +108,11 @@ jobs:
 
     - name: Wait for apps
       run: |
-        timeout 120 bash -c 'until curl -f http://localhost:5003/ || curl -f http://localhost:5003/; do sleep 2; done' || true
-        timeout 120 bash -c 'until curl -f http://localhost:5004/ || curl -f http://localhost:5004/; do sleep 2; done' || true
-        sleep 5
+        echo "Waiting for http://localhost:5003/ to be ready..."
+        timeout 60 bash -c 'until curl -s -f http://localhost:5003/ > /dev/null; do echo "Instance 1 still starting..."; sleep 3; done'
+        echo "Waiting for http://localhost:5004/ to be ready..."
+        timeout 60 bash -c 'until curl -s -f http://localhost:5004/ > /dev/null; do echo "Instance 2 still starting..."; sleep 3; done'
+        echo "Applications are ready!"
 
     - name: Run UI tests
       env:
@@ -122,6 +124,14 @@ jobs:
           --verbosity normal \
           --logger "trx;LogFileName=ui-test-results.trx" \
           -- NUnit.NumberOfTestWorkers=1
+
+    - name: Debug Logs on Failure
+      if: failure()
+      run: |
+        echo "--- Logs for app-instance1 ---"
+        docker logs app-instance1
+        echo "--- Logs for app-instance2 ---"
+        docker logs app-instance2
 
     - name: Cleanup
       if: always()
