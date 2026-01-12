@@ -24,20 +24,24 @@ else
     Console.WriteLine("No connection string found in DefaultConnection configuration.");
 }
 
-// Fix for Render.com: Convert postgres:// or postgresql:// URL to Npgsql Connection String
-if (!string.IsNullOrEmpty(connectionString) && (connectionString.StartsWith("postgres://") || connectionString.StartsWith("postgresql://")))
+// Fix for Render.com: Convert postgres/postgresql URI to Npgsql Connection String
+if (!string.IsNullOrEmpty(connectionString) && 
+    (connectionString.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) || 
+     connectionString.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase)))
 {
     Console.WriteLine("PostgreSQL URI detected. Converting to Npgsql format...");
     try 
     {
+        connectionString = connectionString.Trim();
         var databaseUri = new Uri(connectionString);
         var userInfo = databaseUri.UserInfo.Split(':');
+        
         var npgsqlBuilder = new Npgsql.NpgsqlConnectionStringBuilder
         {
             Host = databaseUri.Host,
-            Port = databaseUri.Port,
+            Port = databaseUri.Port > 0 ? databaseUri.Port : 5432,
             Username = userInfo[0],
-            Password = userInfo.Length > 1 ? userInfo[1] : "",
+            Password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "",
             Database = databaseUri.LocalPath.TrimStart('/'),
             SslMode = Npgsql.SslMode.Require,
             TrustServerCertificate = true
@@ -47,7 +51,7 @@ if (!string.IsNullOrEmpty(connectionString) && (connectionString.StartsWith("pos
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error parsing PostgreSQL URI: {ex.Message}");
+        Console.WriteLine($"Error parsing PostgreSQL URI: {ex.GetType().Name} - {ex.Message}");
     }
 }
 
