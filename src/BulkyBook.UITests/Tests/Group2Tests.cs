@@ -51,7 +51,7 @@ namespace BulkyBook.UITests.Tests
             productLink.Click();
 
             // Wait for the product row with 'qpl' to be present and clickable
-            var productRowLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//tr/td[contains(text(),'qpl')]/parent::tr/td/div/a[1]")));
+            var productRowLink = _wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//tr/td[contains(text(),'qpl')]//parent::tr//a[contains(@href, 'Upsert')]")));
             productRowLink.Click();
 
             // Wait for ISBN input field to be present and send keys
@@ -63,6 +63,29 @@ namespace BulkyBook.UITests.Tests
         [TearDown]
         public void TearDown()
         {
+            if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
+            {
+                string screenshotPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Screenshots");
+                Directory.CreateDirectory(screenshotPath);
+                string fileName = $"{TestContext.CurrentContext.Test.Name}_{DateTime.Now:yyyyMMddHHmmss}.png";
+                string fullPath = Path.Combine(screenshotPath, fileName);
+
+                try
+                {
+                    var screenshot = ((ITakesScreenshot)_driver).GetScreenshot();
+                    screenshot.SaveAsFile(fullPath, ScreenshotImageFormat.Png);
+                    Console.WriteLine($"[DEBUG] Screenshot saved to: {fullPath}");
+                    
+                    // Also print page source for DOM analysis
+                    Console.WriteLine("[DEBUG] Page Source at failure:");
+                    Console.WriteLine(_driver.PageSource);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[DEBUG] Failed to capture screenshot: {ex.Message}");
+                }
+            }
+
             _driver?.Quit();
             _driver?.Dispose();
         }

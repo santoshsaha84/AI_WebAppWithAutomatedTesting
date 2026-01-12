@@ -53,6 +53,14 @@ jobs:
           --logger "trx;LogFileName=ui-test-results.trx" \
           -- NUnit.NumberOfTestWorkers=1
 
+    - name: Upload Failure Screenshots
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ui-test-screenshots
+        path: src/BulkyBook.UITests/bin/Release/net7.0/Screenshots/
+        if-no-files-found: ignore
+
     - name: Debug Logs on Failure
       if: failure()
       run: |
