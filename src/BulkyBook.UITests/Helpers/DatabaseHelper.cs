@@ -9,7 +9,13 @@ namespace BulkyBook.UITests.Helpers
     {
         public static void ResetDatabaseToKnownState(string databaseName)
         {
-            string port = databaseName == "Bulky" ? "5434" : "5435";
+            string port = databaseName switch
+            {
+                "Bulky" => "5434",
+                "Bulky_1" => "5435",
+                "Bulky_2" => "5436",
+                _ => throw new ArgumentException($"Unknown database name: {databaseName}")
+            };
             string connectionString = $"Host=localhost;Port={port};Database={databaseName};Username=postgres;Password=postgres;Pooling=False";
             string masterConnectionString = $"Host=localhost;Port={port};Database=postgres;Username=postgres;Password=postgres;Pooling=False";
 
@@ -53,8 +59,10 @@ namespace BulkyBook.UITests.Helpers
 
                     if (databaseName == "Bulky")
                         SeedDatabase1(context);
-                    else
+                    else if (databaseName == "Bulky_1")
                         SeedDatabase2(context);
+                    else
+                        SeedDatabase3(context);
                     
                     Console.WriteLine($"[DatabaseHelper] Database '{databaseName}' reset successfully.");
                 }
@@ -109,6 +117,24 @@ namespace BulkyBook.UITests.Helpers
                 Author = "mnc",
                 CategoryId = 2,
                 Isbn = "12341234",
+                ImageUrl = ""
+            });
+            context.SaveChanges();
+        }
+        private static void SeedDatabase3(BulkyContext context)
+        {
+            // Seed a product for CrudTests (DeleteProduct_Success)
+            context.Products.Add(new Product
+            {
+                Title = "xya",
+                Description = "Seeded for deletion",
+                Price = 100,
+                Price100 = 100,
+                Price50 = 100,
+                ListPrice = 100,
+                Author = "Seeder",
+                CategoryId = 1,
+                Isbn = "SEED-CRUD-1",
                 ImageUrl = ""
             });
             context.SaveChanges();
