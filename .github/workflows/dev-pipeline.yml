@@ -1,0 +1,41 @@
+name: Dev Pipeline
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '7.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore BulkyWeb.sln
+
+    - name: Build solution
+      run: dotnet build BulkyWeb.sln --no-restore --configuration Release
+
+    - name: Run unit tests
+      run: dotnet test src/BulkyBook.Tests/BulkyBook.Tests.csproj --no-build --configuration Release --verbosity normal
+
+  deploy:
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev' && success()
+    steps:
+    - name: Deploy to Render (Dev)
+      run: |
+        if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_DEV }}" ]; then
+          curl "${{ secrets.RENDER_DEPLOY_HOOK_DEV }}"
+        else
+          echo "Render Deploy Hook secret not found. Skipping deploy."
+        fi

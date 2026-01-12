@@ -1,4 +1,4 @@
-name: Test Branch - Unit and UI Tests
+name: Test Pipeline
 
 on:
   push:
@@ -7,11 +7,11 @@ on:
   pull_request:
     branches:
       - test
+  workflow_dispatch:
 
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -28,19 +28,11 @@ jobs:
       run: dotnet build BulkyWeb.sln --no-restore --configuration Release
 
     - name: Run unit tests
-      run: dotnet test src/BulkyBook.Tests/BulkyBook.Tests.csproj --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=unit-test-results.trx" --collect:"XPlat Code Coverage"
-
-    - name: Upload unit test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: unit-test-results
-        path: '**/unit-test-results.trx'
+      run: dotnet test src/BulkyBook.Tests/BulkyBook.Tests.csproj --no-build --configuration Release --verbosity normal
 
   ui-tests:
-    runs-on: ubuntu-latest
     needs: unit-tests
-    
+    runs-on: ubuntu-latest
     services:
       db_instance1:
         image: postgres:latest
@@ -53,7 +45,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
-
       db_instance2:
         image: postgres:latest
         env:
@@ -84,15 +75,11 @@ jobs:
     - name: Build solution
       run: dotnet build BulkyWeb.sln --no-restore --configuration Release
 
-    - name: Wait for databases to be ready
-      run: |
-        echo "Waiting for databases to be ready..."
-        # Using a simple sleep as health checks are already configured
-        sleep 10
+    - name: Wait for databases
+      run: sleep 10
 
     - name: Setup databases
       run: |
-        # Create databases
         docker exec ${{ job.services.db_instance1.id }} psql -U postgres -c "CREATE DATABASE Bulky;"
         docker exec ${{ job.services.db_instance2.id }} psql -U postgres -c "CREATE DATABASE Bulky_1;"
 
@@ -119,13 +106,11 @@ jobs:
           --add-host=host.docker.internal:host-gateway \
           bulkyimage1
 
-    - name: Wait for applications to be ready
+    - name: Wait for apps
       run: |
-        echo "Waiting for applications to start..."
         timeout 120 bash -c 'until curl -f http://localhost:5003/ || curl -f http://localhost:5003/; do sleep 2; done' || true
         timeout 120 bash -c 'until curl -f http://localhost:5004/ || curl -f http://localhost:5004/; do sleep 2; done' || true
-        sleep 10
-        echo "Applications should be ready!"
+        sleep 5
 
     - name: Run UI tests
       env:
@@ -138,15 +123,6 @@ jobs:
           --logger "trx;LogFileName=ui-test-results.trx" \
           -- NUnit.NumberOfTestWorkers=1
 
-    - name: Upload UI test results
-      uses: actions/upload-artifact@v4
+    - name: Cleanup
       if: always()
-      with:
-        name: ui-test-results
-        path: '**/ui-test-results.trx'
-
-    - name: Cleanup Docker containers
-      if: always()
-      run: |
-        docker stop app-instance1 app-instance2 || true
-        docker rm app-instance1 app-instance2 || true
+      run: docker stop app-instance1 app-instance2 && docker rm app-instance1 app-instance2 || true
