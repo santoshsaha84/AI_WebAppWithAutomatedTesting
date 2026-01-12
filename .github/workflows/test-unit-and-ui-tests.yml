@@ -128,6 +128,8 @@ jobs:
         echo "Applications should be ready!"
 
     - name: Run UI tests
+      env:
+        HEADLESS: true
       run: |
         dotnet test src/BulkyBook.UITests/BulkyBook.UITests.csproj \
           --no-build \
@@ -135,8 +137,6 @@ jobs:
           --verbosity normal \
           --logger "trx;LogFileName=ui-test-results.trx" \
           -- NUnit.NumberOfTestWorkers=1
-        env:
-          HEADLESS: true
 
     - name: Upload UI test results
       uses: actions/upload-artifact@v4
