@@ -135,6 +135,8 @@ jobs:
           --verbosity normal \
           --logger "trx;LogFileName=ui-test-results.trx" \
           -- NUnit.NumberOfTestWorkers=1
+        env:
+          HEADLESS: true
 
     - name: Upload UI test results
       uses: actions/upload-artifact@v4
