@@ -10,53 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  unit-tests:
+  all-tests:
     runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '7.0.x'
-
-    - name: Restore dependencies
-      run: dotnet restore BulkyWeb.sln
-
-    - name: Build solution
-      run: dotnet build BulkyWeb.sln --no-restore --configuration Release
-
-    - name: Run unit tests
-      run: dotnet test src/BulkyBook.Tests/BulkyBook.Tests.csproj --no-build --configuration Release --verbosity normal
-
-  ui-tests:
-    needs: unit-tests
-    runs-on: ubuntu-latest
-    services:
-      db_instance1:
-        image: postgres:latest
-        env:
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5434:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
-      db_instance2:
-        image: postgres:latest
-        env:
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5435:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -75,44 +30,17 @@ jobs:
     - name: Build solution
       run: dotnet build BulkyWeb.sln --no-restore --configuration Release
 
-    - name: Wait for databases
-      run: sleep 10
+    - name: Run unit tests
+      run: dotnet test src/BulkyBook.Tests/BulkyBook.Tests.csproj --no-build --configuration Release --verbosity normal
 
-    - name: Setup databases
+    - name: Build and Start Services with Docker Compose
       run: |
-        docker exec ${{ job.services.db_instance1.id }} psql -U postgres -c "CREATE DATABASE Bulky;"
-        docker exec ${{ job.services.db_instance2.id }} psql -U postgres -c "CREATE DATABASE Bulky_1;"
-
-    - name: Build Docker image
-      run: docker build -t bulkyimage1 .
-
-    - name: Start application instance 1
-      run: |
-        docker run -d \
-          --name app-instance1 \
-          -p 5003:80 \
-          -e ASPNETCORE_ENVIRONMENT=Development \
-          -e ConnectionStrings__DefaultConnection="Host=host.docker.internal;Port=5434;Database=Bulky;Username=postgres;Password=postgres" \
-          --add-host=host.docker.internal:host-gateway \
-          bulkyimage1
-
-    - name: Start application instance 2
-      run: |
-        docker run -d \
-          --name app-instance2 \
-          -p 5004:80 \
-          -e ASPNETCORE_ENVIRONMENT=Development \
-          -e ConnectionStrings__DefaultConnection="Host=host.docker.internal;Port=5435;Database=Bulky_1;Username=postgres;Password=postgres" \
-          --add-host=host.docker.internal:host-gateway \
-          bulkyimage1
-
-    - name: Wait for apps
-      run: |
-        echo "Waiting for http://localhost:5003/ to be ready..."
-        timeout 60 bash -c 'until curl -s -f http://localhost:5003/ > /dev/null; do echo "Instance 1 still starting..."; sleep 3; done'
-        echo "Waiting for http://localhost:5004/ to be ready..."
-        timeout 60 bash -c 'until curl -s -f http://localhost:5004/ > /dev/null; do echo "Instance 2 still starting..."; sleep 3; done'
-        echo "Applications are ready!"
+        docker compose build
+        docker compose up -d
+        echo "Waiting for services to be healthy..."
+        # Compose depends_on with service_healthy will wait for DBs
+        # We still add a small buffer for the apps to finish migrations
+        sleep 10
 
     - name: Run UI tests
       env:
@@ -128,11 +56,8 @@ jobs:
     - name: Debug Logs on Failure
       if: failure()
       run: |
-        echo "--- Logs for app-instance1 ---"
-        docker logs app-instance1
-        echo "--- Logs for app-instance2 ---"
-        docker logs app-instance2
+        docker compose logs
 
     - name: Cleanup
       if: always()
-      run: docker stop app-instance1 app-instance2 && docker rm app-instance1 app-instance2 || true
+      run: docker compose down || true
